@@ -1,0 +1,7 @@
+{
+  "name": "MaduraiOrganic",
+  "description": "A premium farm-to-table organic produce platform with admin management, real-time inventory tracking, and a seamless shopping experience.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
