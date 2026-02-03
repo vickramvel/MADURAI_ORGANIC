@@ -6,6 +6,18 @@ export enum AppView {
   LOGIN = 'login',
   ADMIN_DASHBOARD = 'admin_dashboard',
   ADMIN_INVENTORY = 'admin_inventory',
+  ADMIN_REVENUE = 'admin_revenue',
+  ABOUT = 'about',
+  CONTACT = 'contact',
+  PROFILE = 'profile',
+  CUSTOMER_ORDERS = 'customer_orders',
+}
+
+export interface CustomerProfile {
+  name: string;
+  phone: string;
+  address: string;
+  bio: string;
 }
 
 export interface Product {
@@ -30,10 +42,21 @@ export interface CartItem extends Product {
 export interface Order {
   id: string;
   customerName: string;
-  customerAvatar: string;
   items: string;
   total: number;
   status: 'Paid' | 'Pending' | 'Packed' | 'Shipped';
+  date: string;
+  address?: string;
+  phone?: string;
+  detailedItems?: { name: string; qty: number; price: number }[];
+}
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
   date: string;
 }
 
@@ -43,4 +66,15 @@ export interface Stat {
   trend: string;
   trendType: 'up' | 'down';
   icon: string;
+}
+
+// Added FarmerApplication interface to fix import error in FarmerPartnershipPage.tsx
+export interface FarmerApplication {
+  id: string;
+  farmName: string;
+  location: string;
+  produce: string;
+  contactName: string;
+  phone: string;
+  date: string;
 }

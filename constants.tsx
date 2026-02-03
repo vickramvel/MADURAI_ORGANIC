@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Product } from './types';
 
 export const COLORS = {
   primary: '#22c55e', // green-600
@@ -35,93 +36,116 @@ export const Icons = {
   ),
 };
 
-export const INITIAL_PRODUCTS: any[] = [
+export const INITIAL_PRODUCTS: Product[] = [
   {
-    id: '1',
-    name: 'Organic Spinach',
-    category: 'Leafy Greens',
-    unit: 'Bunch',
+    id: 'p1',
+    name: 'Organic Vine Tomatoes',
+    category: 'Vegetables',
+    unit: 'kg',
     price: 60,
-    availableQty: 50,
-    maxQty: 60,
-    image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?q=80&w=400&h=400&fit=crop',
+    availableQty: 45,
+    maxQty: 100,
+    image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?q=80&w=800&auto=format&fit=crop',
     inStock: true,
     lowStockThreshold: 10,
     tag: 'Fresh',
-    description: 'Freshly cut organic spinach, rich in iron and vitamins.'
+    description: 'Juicy, sun-ripened tomatoes grown without any synthetic pesticides.'
   },
   {
-    id: '2',
-    name: 'Country Eggs',
+    id: 'p2',
+    name: 'Farm Fresh Country Eggs',
     category: 'Dairy & Eggs',
-    unit: 'pc',
-    price: 10,
+    unit: 'doz',
+    price: 120,
     availableQty: 15,
-    maxQty: 100,
-    image: 'https://images.unsplash.com/photo-1516448620398-c5f44bf9f441?q=80&w=400&h=400&fit=crop',
-    inStock: true,
-    lowStockThreshold: 20,
-    tag: 'Low Stock',
-    description: 'Nutritious country eggs from pasture-raised hens.'
-  },
-  {
-    id: '3',
-    name: 'Red Tomatoes',
-    category: 'Vegetables',
-    unit: 'kg',
-    price: 80,
-    availableQty: 120,
-    maxQty: 200,
-    image: 'https://images.unsplash.com/photo-1518977676601-b53f02ac6d31?q=80&w=400&h=400&fit=crop',
-    inStock: true,
-    lowStockThreshold: 30,
-    description: 'Vine-ripened organic tomatoes, perfect for salads and sauces.'
-  },
-  {
-    id: '4',
-    name: 'Sweet Carrots',
-    category: 'Root Veg',
-    unit: 'kg',
-    price: 55,
-    availableQty: 40,
-    maxQty: 100,
-    image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?q=80&w=400&h=400&fit=crop',
-    inStock: true,
-    lowStockThreshold: 10,
-    description: 'Crunchy and sweet carrots, harvested fresh this morning.'
-  },
-  {
-    id: '5',
-    name: 'Cauliflower',
-    category: 'Vegetables',
-    unit: 'pc',
-    price: 45,
-    availableQty: 92,
-    maxQty: 100,
-    image: 'https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?q=80&w=400&h=400&fit=crop',
+    maxQty: 30,
+    image: 'https://images.unsplash.com/photo-1569288052389-dac9b01c9c05?q=80&w=800&auto=format&fit=crop',
     inStock: true,
     lowStockThreshold: 5,
-    description: 'Dense and creamy organic cauliflower heads.'
+    tag: 'Popular',
+    description: 'Free-range country chicken eggs, rich in flavor and nutrition.'
   },
   {
-    id: '6',
-    name: 'Strawberries',
+    id: 'p3',
+    name: 'Madurai Spinach (Palak)',
+    category: 'Leafy Greens',
+    unit: 'bunch',
+    price: 25,
+    availableQty: 20,
+    maxQty: 50,
+    image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?q=80&w=800&auto=format&fit=crop',
+    inStock: true,
+    lowStockThreshold: 8,
+    tag: 'Fresh',
+    description: 'Crispy, vibrant green spinach leaves harvested at dawn.'
+  },
+  {
+    id: 'p4',
+    name: 'Organic Alphonso Mangoes',
     category: 'Fruits',
-    unit: 'box',
-    price: 180,
-    availableQty: 8,
-    maxQty: 100,
-    image: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=400&h=400&fit=crop',
+    unit: 'kg',
+    price: 240,
+    availableQty: 12,
+    maxQty: 40,
+    image: 'https://images.unsplash.com/photo-1553279768-865429fa0078?q=80&w=800&auto=format&fit=crop',
+    inStock: true,
+    lowStockThreshold: 5,
+    tag: 'Seasonal',
+    description: 'The king of fruits. Naturally ripened and incredibly sweet.'
+  },
+  {
+    id: 'p5',
+    name: 'Native Baby Carrots',
+    category: 'Root Veg',
+    unit: 'kg',
+    price: 85,
+    availableQty: 30,
+    maxQty: 60,
+    image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?q=80&w=800&auto=format&fit=crop',
     inStock: true,
     lowStockThreshold: 10,
-    tag: 'Last Batch',
-    description: 'Juicy, sweet strawberries picked at the peak of ripeness.'
+    description: 'Sweet and crunchy root vegetables, perfect for salads or cooking.'
+  },
+  {
+    id: 'p6',
+    name: 'Fresh Buffalo Milk',
+    category: 'Dairy & Eggs',
+    unit: 'L',
+    price: 75,
+    availableQty: 5,
+    maxQty: 20,
+    image: 'https://images.unsplash.com/photo-1550583724-12770d88a04b?q=80&w=800&auto=format&fit=crop',
+    inStock: true,
+    lowStockThreshold: 5,
+    tag: 'Limited',
+    description: 'Pure, thick, and unadulterated milk from our farm-reared buffaloes.'
+  },
+  {
+    id: 'p7',
+    name: 'Green Bell Peppers',
+    category: 'Vegetables',
+    unit: 'kg',
+    price: 90,
+    availableQty: 25,
+    maxQty: 50,
+    image: 'https://images.unsplash.com/photo-1563565312-82ca213b3074?q=80&w=800&auto=format&fit=crop',
+    inStock: true,
+    lowStockThreshold: 5,
+    description: 'Shiny, firm capsicums with a mild and sweet flavor profile.'
+  },
+  {
+    id: 'p8',
+    name: 'Organic Red Onions',
+    category: 'Root Veg',
+    unit: 'kg',
+    price: 45,
+    availableQty: 100,
+    maxQty: 200,
+    image: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?q=80&w=800&auto=format&fit=crop',
+    inStock: true,
+    lowStockThreshold: 20,
+    description: 'Strong-flavored native onions, essential for every kitchen.'
   }
 ];
 
-export const INITIAL_ORDERS: any[] = [
-  { id: '#ORD-001', customerName: 'Sarah Johnson', customerAvatar: 'https://i.pravatar.cc/150?u=sarah', items: 'Organic Kale, Tomatoes...', total: 45.00, status: 'Paid', date: 'Oct 25, 2023' },
-  { id: '#ORD-002', customerName: 'Michael Chen', customerAvatar: 'https://i.pravatar.cc/150?u=michael', items: 'Fresh Carrots (5kg)', total: 32.50, status: 'Pending', date: 'Oct 25, 2023' },
-  { id: '#ORD-003', customerName: 'Emma Wilson', customerAvatar: 'https://i.pravatar.cc/150?u=emma', items: 'Mixed Herbs Box', total: 28.00, status: 'Packed', date: 'Oct 24, 2023' },
-  { id: '#ORD-004', customerName: 'Robert Fox', customerAvatar: 'https://i.pravatar.cc/150?u=robert', items: 'Spinach, Potatoes', total: 15.50, status: 'Paid', date: 'Oct 24, 2023' },
-];
+export const INITIAL_ORDERS: any[] = [];

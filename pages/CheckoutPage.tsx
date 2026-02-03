@@ -1,203 +1,207 @@
 
 import React, { useState } from 'react';
-import { AppView, CartItem } from '../types';
-import { Icons } from '../constants';
+import { AppView, CartItem, Order } from '../types';
 
 interface CheckoutPageProps {
   cart: CartItem[];
   setView: (view: AppView) => void;
   clearCart: () => void;
+  userName: string;
+  addOrder: (order: Order) => void;
+  initialAddress?: string;
 }
 
-const CheckoutPage: React.FC<CheckoutPageProps> = ({ cart, setView, clearCart }) => {
-  const [method, setMethod] = useState<'upi' | 'card' | 'net'>('upi');
+const CheckoutPage: React.FC<CheckoutPageProps> = ({ cart, setView, clearCart, userName, addOrder, initialAddress }) => {
+  const [address, setAddress] = useState(initialAddress || '');
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'upi'>('cod');
   const [isOrdered, setIsOrdered] = useState(false);
+  const [error, setError] = useState('');
+  
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const deliveryFee = subtotal > 500 ? 0 : 40;
-  const taxes = Math.round(subtotal * 0.05);
-  const total = subtotal + deliveryFee + taxes;
+  const total = subtotal;
+
+  const UPI_ID = "ananth.s.kumar1@okhdfcbank";
+  const PAYEE_NAME = "Ananth Kumar";
+  
+  const UPI_PAYMENT_URL = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&cu=INR&am=${total}`;
+  const USER_QR_IMAGE = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(UPI_PAYMENT_URL)}`;
+  
+  const GPAY_LOGO = "https://img.icons8.com/color/48/google-pay.png";
 
   const handlePlaceOrder = () => {
+    if (!address.trim()) {
+      setError('Please provide a delivery address');
+      return;
+    }
+
+    const newOrder: Order = {
+      id: `#ORD-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+      customerName: userName || 'Guest',
+      items: cart.map(i => `${i.name} (${i.quantity}${i.unit})`).join(', '),
+      total: total,
+      status: paymentMethod === 'cod' ? 'Pending' : 'Paid',
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      address: address,
+      detailedItems: cart.map(i => ({ name: i.name, qty: i.quantity, price: i.price }))
+    };
+
+    addOrder(newOrder);
     setIsOrdered(true);
-    setTimeout(() => {
-      clearCart();
-      setView(AppView.SHOP);
-    }, 2000);
+    clearCart();
+    window.scrollTo(0,0);
   };
 
   if (isOrdered) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-white">
-        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-8 animate-bounce">
-          <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 md:p-8 text-center">
+        <div className="w-20 h-20 md:w-24 md:h-24 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-8 animate-bounce">
+          <svg className="w-10 h-10 md:w-12 md:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 className="text-4xl font-bold text-slate-900 mb-4">Order Successful!</h1>
-        <p className="text-slate-500">Your fresh harvest will arrive soon.</p>
+        <h1 className="text-3xl md:text-4xl font-black text-slate-900 mb-4 uppercase tracking-tighter">Order Success!</h1>
+        <p className="text-sm md:text-base text-slate-500 max-w-md mx-auto mb-10 font-medium">Your harvest order has been placed and is being processed.</p>
+        <button
+          onClick={() => setView(AppView.LANDING)}
+          className="w-full sm:w-auto bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold hover:bg-green-600 transition shadow-xl active:scale-95"
+        >
+          Return to Home
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <nav className="bg-white border-b px-8 py-4 flex items-center justify-between sticky top-0 z-40">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView(AppView.SHOP)}>
-          <span className="text-xl font-bold text-slate-900 uppercase">Madurai Organic</span>
-        </div>
-        <div className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-widest">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          Secure Checkout
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2 space-y-8">
-          <div>
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">Secure Checkout</h1>
-            <p className="text-slate-500">Complete your purchase for daily fresh harvest.</p>
+    <div className="min-h-screen bg-slate-50 py-6 md:py-12 px-4 md:px-8">
+      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 md:gap-12">
+        <div className="flex-1 space-y-6 md:space-y-8">
+          <div className="flex items-center gap-4 mb-2">
+            <button onClick={() => setView(AppView.SHOP)} className="p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-slate-900 transition">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
+            <h1 className="text-3xl md:text-4xl font-black text-slate-900 uppercase tracking-tighter">Checkout</h1>
           </div>
 
-          {/* Delivery Details */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
-              <h3 className="text-xl font-bold">Delivery Details</h3>
-            </div>
-            <div className="space-y-4">
-              <div className="border-2 border-green-600 rounded-2xl p-6 bg-green-50/30 flex gap-4 relative">
-                <div className="w-6 h-6 rounded-full border-2 border-green-600 flex items-center justify-center flex-shrink-0">
-                  <div className="w-3 h-3 rounded-full bg-green-600"></div>
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="font-bold text-slate-900">Home - 123 Green Way</span>
-                    <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase">Default</span>
+          <section className="bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-10 border border-slate-100 shadow-sm">
+            <h2 className="text-lg md:text-xl font-bold text-slate-900 mb-6 md:mb-8 uppercase tracking-tight">1. Delivery Address</h2>
+            <textarea
+              placeholder="Enter your full street address, landmark and city..."
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 md:px-6 py-4 md:py-5 text-slate-950 text-sm md:text-base font-medium placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-green-600/5 focus:border-green-600 transition-all resize-none min-h-[120px]"
+              rows={4}
+              value={address}
+              onChange={(e) => {
+                setAddress(e.target.value);
+                setError('');
+              }}
+            />
+            {error && <p className="text-red-500 text-[10px] md:text-xs font-bold mt-3 ml-2 uppercase tracking-widest">{error}</p>}
+          </section>
+
+          <section className="bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-10 border border-slate-100 shadow-sm">
+            <h2 className="text-lg md:text-xl font-bold text-slate-900 mb-6 md:mb-8 uppercase tracking-tight">2. Payment Method</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              <button
+                onClick={() => setPaymentMethod('cod')}
+                className={`flex items-center justify-between p-5 md:p-6 rounded-3xl border-2 transition-all ${
+                  paymentMethod === 'cod' ? 'border-green-600 bg-green-50/50' : 'border-slate-100 hover:border-slate-200'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <span className="text-2xl">💵</span>
+                  <div className="text-left">
+                    <p className="font-bold text-slate-900 uppercase text-[10px] md:text-xs tracking-widest">Cash on Delivery</p>
+                    <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase">Pay at your door</p>
                   </div>
-                  <p className="text-slate-500 text-sm mb-1">Near Central Park, Anna Nagar, Madurai - 625020</p>
-                  <p className="font-semibold text-slate-900">Rahul Sharma, +91 98765 43210</p>
                 </div>
-              </div>
-              <div className="border border-slate-200 rounded-2xl p-6 flex gap-4 opacity-60">
-                <div className="w-6 h-6 rounded-full border-2 border-slate-300 flex-shrink-0"></div>
-                <div className="flex-1">
-                  <span className="font-bold text-slate-900">Office - 45 Tech Park</span>
-                  <p className="text-slate-500 text-sm">KK Nagar, Madurai - 625020</p>
+              </button>
+
+              <button
+                onClick={() => setPaymentMethod('upi')}
+                className={`flex items-center justify-between p-5 md:p-6 rounded-3xl border-2 transition-all ${
+                  paymentMethod === 'upi' ? 'border-green-600 bg-green-50/50' : 'border-slate-100 hover:border-slate-200'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <span className="text-2xl">📱</span>
+                  <div className="text-left">
+                    <p className="font-bold text-slate-900 uppercase text-[10px] md:text-xs tracking-widest">UPI Payment</p>
+                    <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase">Scan & Pay Now</p>
+                  </div>
                 </div>
-              </div>
-              <button className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold hover:border-green-600 hover:text-green-600 transition">
-                + Add New Address
               </button>
             </div>
-          </div>
 
-          {/* Delivery Slot */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
-              <h3 className="text-xl font-bold">Delivery Slot</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border-2 border-green-600 bg-green-50/30 p-6 rounded-2xl flex items-start gap-4 cursor-pointer">
-                <div className="text-2xl">☀️</div>
-                <div>
-                  <h4 className="font-bold text-green-800">Morning Harvest</h4>
-                  <p className="text-sm text-green-700 font-bold mb-1">6:00 AM - 9:00 AM</p>
-                  <p className="text-xs text-green-600">Freshly harvested before sunrise.</p>
+            {paymentMethod === 'upi' && (
+              <div className="bg-slate-50 rounded-[28px] md:rounded-[32px] p-6 md:p-8 border border-slate-200 animate-in slide-in-from-top-4 duration-500">
+                <div className="flex flex-col items-center text-center">
+                  <div className="flex items-center gap-2 mb-6 bg-white px-3 md:px-4 py-1.5 md:py-2 rounded-full border shadow-sm">
+                    <img src={GPAY_LOGO} alt="GPay" className="w-5 h-5 md:w-6 h-6" />
+                    <span className="text-[9px] md:text-xs font-black text-slate-900 uppercase tracking-widest">Secure UPI Gateway</span>
+                  </div>
+                  
+                  <div className="bg-white p-4 md:p-6 rounded-[28px] md:rounded-[32px] shadow-lg mb-6 border-4 border-white">
+                    <img 
+                      src={USER_QR_IMAGE} 
+                      alt="Payment QR Code" 
+                      className="w-40 h-40 md:w-64 md:h-64 object-contain"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <p className="text-lg md:text-xl font-black text-slate-900 tracking-tight">Scan to pay ₹{total}</p>
+                    <div className="bg-white/60 px-4 py-2 rounded-xl border border-dashed border-slate-300 inline-block">
+                      <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Payable To</p>
+                      <p className="text-[11px] md:text-xs font-bold text-slate-900">{PAYEE_NAME}</p>
+                      <p className="text-[9px] font-mono text-green-600">{UPI_ID}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 flex items-center gap-3 text-[9px] md:text-[10px] font-black text-green-600 uppercase tracking-widest bg-green-50 px-5 md:px-6 py-2.5 md:py-3 rounded-2xl border border-green-100">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    Waiting for payment...
+                  </div>
                 </div>
               </div>
-              <div className="border border-slate-200 p-6 rounded-2xl flex items-start gap-4 cursor-pointer hover:bg-slate-50 transition">
-                <div className="text-2xl">🌙</div>
-                <div>
-                  <h4 className="font-bold text-slate-900">Evening Harvest</h4>
-                  <p className="text-sm text-slate-600 font-bold mb-1">5:00 PM - 8:00 PM</p>
-                  <p className="text-xs text-slate-400">Freshly harvested in the afternoon.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+            )}
+          </section>
         </div>
 
-        {/* Order Summary */}
-        <div className="space-y-8">
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl shadow-slate-200/50">
-            <h3 className="text-xl font-bold mb-8">Order Summary</h3>
-            <div className="space-y-6 mb-8">
+        {/* Order Summary Sidebar */}
+        <div className="lg:w-96">
+          <aside className="bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-8 border border-slate-100 shadow-xl sticky top-24">
+            <h2 className="text-lg md:text-xl font-bold text-slate-900 mb-6 uppercase tracking-tight">Your Order</h2>
+            <div className="space-y-4 mb-8 max-h-60 overflow-y-auto pr-2 scrollbar-hide">
               {cart.map(item => (
-                <div key={item.id} className="flex gap-4">
-                  <img src={item.image} className="w-16 h-16 rounded-xl object-cover" alt="" />
-                  <div className="flex-1">
-                    <h4 className="font-bold text-slate-900 text-sm leading-tight">{item.name}</h4>
-                    <p className="text-xs text-slate-400">{item.quantity} x {item.unit}</p>
+                <div key={item.id} className="flex justify-between items-center text-sm">
+                  <div>
+                    <p className="font-bold text-slate-900">{item.name}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">Qty: {item.quantity}</p>
                   </div>
-                  <span className="font-bold text-slate-900">₹{item.price * item.quantity}</span>
+                  <p className="font-bold text-slate-900">₹{item.price * item.quantity}</p>
                 </div>
               ))}
             </div>
 
-            <div className="space-y-4 border-t pt-6 mb-8 text-sm">
-              <div className="flex justify-between text-slate-500">
-                <span>Subtotal</span>
-                <span>₹{subtotal}</span>
-              </div>
-              <div className="flex justify-between text-slate-500">
-                <span>Delivery Fee</span>
-                <span className={deliveryFee === 0 ? 'text-green-600 font-bold' : ''}>{deliveryFee === 0 ? 'Free' : `₹${deliveryFee}`}</span>
-              </div>
-              <div className="flex justify-between text-slate-500">
-                <span>Taxes</span>
-                <span>₹{taxes}</span>
-              </div>
-              <div className="flex justify-between text-slate-900 font-bold text-xl pt-2">
-                <span>Total to Pay</span>
-                <span>₹{total}</span>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Payment Method</p>
-              <div
-                onClick={() => setMethod('upi')}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition flex items-center justify-between ${method === 'upi' ? 'border-green-600 bg-green-50/30' : 'border-slate-100'}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">📱</div>
-                  <span className="font-bold text-sm">UPI / QR Code</span>
-                </div>
-                {method === 'upi' && <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center text-white text-[10px]">✓</div>}
-              </div>
-              {method === 'upi' && (
-                <div className="py-6 flex flex-col items-center">
-                  <div className="w-32 h-32 border-2 border-slate-100 rounded-2xl p-2 mb-4">
-                     <div className="w-full h-full bg-slate-50 rounded-lg flex items-center justify-center text-xs text-slate-400">QR CODE</div>
-                  </div>
-                  <p className="text-[10px] text-slate-400 font-bold">SCAN WITH ANY UPI APP</p>
-                </div>
-              )}
-              <div
-                onClick={() => setMethod('card')}
-                className={`p-4 rounded-xl border cursor-pointer flex items-center justify-between ${method === 'card' ? 'border-green-600 bg-green-50/30' : 'border-slate-100'}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">💳</div>
-                  <span className="font-bold text-sm text-slate-600">Credit / Debit Card</span>
-                </div>
-                <span className="text-slate-300">→</span>
+            <div className="pt-6 border-t">
+              <div className="flex justify-between items-center">
+                <span className="font-black text-slate-400 uppercase text-[10px] tracking-widest">Grand Total</span>
+                <span className="text-3xl font-black text-slate-950 tracking-tighter">₹{total}</span>
               </div>
             </div>
 
             <button
               onClick={handlePlaceOrder}
-              className="w-full bg-green-600 text-white py-5 rounded-2xl font-bold text-lg mt-8 hover:bg-green-700 transition shadow-xl shadow-green-600/30 active:scale-[0.98]"
+              disabled={cart.length === 0}
+              className="w-full bg-slate-900 text-white py-4 md:py-5 rounded-[20px] md:rounded-3xl font-black text-base md:text-lg hover:bg-green-600 transition shadow-2xl active:scale-95 mt-8 disabled:opacity-50"
             >
-              Place Order & Pay ₹{total}
+              {paymentMethod === 'upi' ? 'I Have Scanned & Paid' : 'Confirm Order'}
             </button>
-            <p className="text-center text-[10px] text-slate-400 font-medium mt-6 uppercase tracking-wider">
-              🛡️ Payments processed securely by Razorpay
+            <p className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-4">
+              Secure Delivery via MaduraiOrganic
             </p>
-          </div>
+          </aside>
         </div>
       </div>
     </div>
